@@ -32,8 +32,9 @@ interface HomeProps {
   postsPagination: PostPagination;
 }
 
-export default function Home({ postsPagination }: HomeProps) {
+export default function Home({ postsPagination }: HomeProps): JSX.Element {
   const [posts, setPosts] = useState<Post[]>(postsPagination.results)
+  const [nextPage, setNextPage] = useState(postsPagination.next_page);
 
   console.log(posts)
   
@@ -50,9 +51,7 @@ export default function Home({ postsPagination }: HomeProps) {
 
       <main className={styles.container}>
         <div className={styles.posts}>
-          {posts.map(post => (
-            <p>{post.data.title}</p>
-          ))}
+         
         </div>
       </main>
 
@@ -62,8 +61,9 @@ export default function Home({ postsPagination }: HomeProps) {
 
 export const getStaticProps: GetStaticProps = async () => {
   const prismic = getPrismicClient({});
-  const postsResponse = await prismic.getByType('posts', {pageSize: 1});
+  const postsResponse = await prismic.getByType('posts', {pageSize: 5});
 
+  
   const results = postsResponse.results.map(post => {
     return{
       uid: post.uid,
@@ -73,21 +73,19 @@ export const getStaticProps: GetStaticProps = async () => {
         {
           locale: ptBR
         }
-      ),
-      data: {
-        title: post.data.title,
-        subtitle: post.data.subtitle,
-        author: post.data.author,
-      },
-    }
-  })
+        ),
+        data: post.data
+      }
+    })
+
+  const  postsPagination = {
+    next_page: postsResponse.next_page,
+    results
+  }
 
   return{
     props: {
-      postsPagination: {
-        next_page: postsResponse.next_page,
-        results
-      }
+      postsPagination
     },
     revalidate: 60 * 60 * 12 // 12 hours
   }

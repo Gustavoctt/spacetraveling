@@ -1,12 +1,60 @@
 .container{
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-
   img{
     width: 100vw;
     height: 400px;
     object-fit: cover;
+    margin-bottom: 2rem;
+  }
+
+  .containerPost{
+    max-width: 720px;
+    margin: 0 auto;
+
+    h1{
+      font-size: 2rem;
+      color: var(--white-100);
+
+    }
+
+    .informationPost{
+      max-width: 370px;
+      margin-bottom: 2rem;
+      margin-top: 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      
+      time, span{
+        display: flex;
+        align-items: center;
+        flex-direction: row;
+
+        font-size: 0.875rem;
+
+        svg{
+          margin-right: 0.5rem;
+        }
+      }
+     
+    }
+
+    .content{
+      h2{
+        font-size: 2.25rem;
+        color: var(--white-100);
+        margin-bottom: 1rem;
+      }
+
+      .contentBody{
+        p{
+          line-height: 1.4rem;
+          margin-bottom: 1rem;
+          text-align: justify;
+
+          & + p {
+            margin-top: 1rem;
+          }
+        }
+      }
+    }
   }
 }

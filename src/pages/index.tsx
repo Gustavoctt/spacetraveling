@@ -33,10 +33,36 @@ interface HomeProps {
 }
 
 export default function Home({ postsPagination }: HomeProps): JSX.Element {
-  const [posts, setPosts] = useState<Post[]>(postsPagination.results)
+  const [posts, setPosts] = useState<Post[]>([...postsPagination.results] || [])
   const [nextPage, setNextPage] = useState(postsPagination.next_page);
 
-  console.log(posts)
+  function handleNextPosts(){
+    fetch(nextPage)
+      .then(response => response.json())
+      .then(data => {
+        const newPosts = data.results.map(result => {
+          const post: Post = {
+            first_publication_date: format(
+              new Date(result.first_publication_date),
+              'PP',
+              {
+                locale: ptBR
+              }
+              ),
+            uid: result.uid,
+            data: {
+              title: result.data.title,
+              author: result.data.author,
+              subtitle: result.data.subtitle
+            },
+          }
+          return post;
+        })
+
+        setNextPage(null)
+        setPosts([...postsPagination.results, ...newPosts]);
+      })
+  }
   
 
   return(
@@ -51,7 +77,33 @@ export default function Home({ postsPagination }: HomeProps): JSX.Element {
 
       <main className={styles.container}>
         <div className={styles.posts}>
-         
+         {posts.map(post => (
+           <Link key={post.uid} href={`/post/${post.uid}`}>
+              <a>
+                <h1>{post.data.title}</h1>
+                <p>{post.data.subtitle}</p>
+
+                <div className={styles.informationPost}>
+                  <time>
+                    <FiCalendar size={20}/>
+                    {post.first_publication_date}
+                  </time>
+
+                  <span>
+                    <FiUser size={20} />
+                    {post.data.author}
+                  </span>
+                </div>
+              </a>
+           </Link>
+         ))}
+        {nextPage !== null && (
+          <button
+            onClick={handleNextPosts}
+          >
+            Carregar mais posts
+          </button>
+        )}
         </div>
       </main>
 
@@ -61,7 +113,7 @@ export default function Home({ postsPagination }: HomeProps): JSX.Element {
 
 export const getStaticProps: GetStaticProps = async () => {
   const prismic = getPrismicClient({});
-  const postsResponse = await prismic.getByType('posts', {pageSize: 5});
+  const postsResponse = await prismic.getByType('post', {pageSize: 1});
 
   
   const results = postsResponse.results.map(post => {

@@ -32,6 +32,19 @@ interface PostProps {
 }
 
 export default function Post({ post }: PostProps) {
+  const wordsRead = 200;
+  const sumTotalWords = post.data.content.reduce(( sumTotal, itemText ) => {
+    const totalWords = itemText.body.map(item => item.text.split(' ').length);
+
+    totalWords.forEach(word => ( sumTotal += word ))
+    return sumTotal;
+  }, 0)
+
+
+  const readByMinute = Math.ceil(sumTotalWords / wordsRead)
+
+  console.log()
+
   return(
     <>
       <head>
@@ -51,11 +64,11 @@ export default function Post({ post }: PostProps) {
             </time>
             <span> 
               <FiUser size={20}/>
-              15 Mar 2021
+              {post.data.author}
             </span>
             <span> 
               <FiClock size={20} />
-              03 min
+              {readByMinute} min
               </span>
           </div>
 

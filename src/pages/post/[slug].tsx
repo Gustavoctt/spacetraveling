@@ -9,6 +9,7 @@ import { getPrismicClient } from '../../services/prismic';
 import commonStyles from '../../styles/common.module.scss';
 import styles from './post.module.scss';
 import { RichText } from 'prismic-dom';
+import { useRouter } from 'next/router';
 
 interface Post {
   first_publication_date: string | null;
@@ -32,6 +33,12 @@ interface PostProps {
 }
 
 export default function Post({ post }: PostProps) {
+  const router = useRouter();
+
+  if(router.isFallback){
+    return <span>Carregando...</span>
+  }
+
   const wordsRead = 200;
   const sumTotalWords = post.data.content.reduce(( sumTotal, itemText ) => {
     const totalWords = itemText.body.map(item => item.text.split(' ').length);
@@ -40,27 +47,28 @@ export default function Post({ post }: PostProps) {
     return sumTotal;
   }, 0)
 
-
   const readByMinute = Math.ceil(sumTotalWords / wordsRead)
-
-  console.log()
 
   return(
     <>
-      <head>
-        <title>{post.data.title} | SpaceTraveling</title>
-      </head>
+     
       <Header/>
 
       <article className={styles.container}>
         <img src={post.data.banner.url} alt="banner post" />
 
         <div className={styles.containerPost}>
-          <h1>Criando um app CRA do zero</h1>
+          <h1>{post.data.title}</h1>
           <div className={styles.informationPost}>
             <time> 
               <FiCalendar size={20} />
-              15 Mar 2021
+              {format(
+              new Date(post.first_publication_date),
+              'PP',
+              {
+                locale: ptBR
+              }
+              )}
             </time>
             <span> 
               <FiUser size={20}/>
@@ -108,13 +116,7 @@ export const getStaticProps: GetStaticProps = async ({ params }) => {
 
   const post = {
     uid: response.uid,
-    first_publication_date: format(
-      new Date(response.first_publication_date),
-      'PP',
-      {
-        locale: ptBR
-      }
-    ),
+    first_publication_date: response.first_publication_date,
     data: {
       title: response.data.title,
       subtitle: response.data.subtitle,
